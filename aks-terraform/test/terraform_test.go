@@ -1,3 +1,4 @@
+
 package test
 
 import (
@@ -17,10 +18,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTerraformAzureAKSExample(t *testing.T) {
+func TestTerraformAzureAKS(t *testing.T) {
 	t.Parallel()
 	// MC_+ResourceGroupName_ClusterName_AzureRegion must be no greater than 80 chars.
-	// https://docs.microsoft.com/en-us/azure/aks/troubleshooting#what-naming-restrictions-are-enforced-for-aks-resources-and-parameters
 	expectedClusterName := fmt.Sprintf("terratest-aks-cluster-%s", random.UniqueId())
 	expectedResourceGroupName := fmt.Sprintf("terratest-aks-rg-%s", random.UniqueId())
 	expectedAnodeCount := 2
@@ -42,13 +42,14 @@ func TestTerraformAzureAKSExample(t *testing.T) {
 	// Look up the cluster node count
 	cluster, err := azure.GetManagedClusterE(t, expectedResourceGroupName, expectedClusterName, "")
 	require.NoError(t, err)
+
 	actualCount := *(*cluster.ManagedClusterProperties.AgentPoolProfiles)[0].Count
 
 	// Test that the Node count matches the Terraform specification
 	assert.Equal(t, int32(expectedAnodeCount), actualCount)
 
 	// Path to the Kubernetes resource config we will test
-	kubeResourcePath, err := filepath.Abs("../nginx-deployment.yml,")
+	kubeResourcePath, err := filepath.Abs("../nginx-deployment.yaml")
 	require.NoError(t, err)
 
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
